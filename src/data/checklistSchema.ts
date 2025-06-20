@@ -1,6 +1,6 @@
 
 
-import { BSON, ObjectSchema } from 'realm';
+import { ObjectSchema } from 'realm';
 
 export const checklistItemSchema: ObjectSchema = {
   name: 'ChecklistItem',

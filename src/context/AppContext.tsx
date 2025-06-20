@@ -1,10 +1,9 @@
-
 import { useEffect } from 'react';
 import { loadChecklists, saveChecklist } from '../storage/storageHelpers';
 
 
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { appReducer } from './appReducer';
+import appReducer from './appReducer';
 import { AppState, AppAction } from './types';
 
 // Początkowy stan aplikacji

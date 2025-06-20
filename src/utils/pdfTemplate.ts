@@ -1,7 +1,7 @@
 
 
 
-import { Checklist } from '../../android/src/context/types';
+import { Checklist } from '@/context/types';
 
 export const generateChecklistHTML = (checklist: Checklist): string => {
   const tasksHTML = checklist.items
@@ -29,7 +29,7 @@ export const generateChecklistHTML = (checklist: Checklist): string => {
       </head>
       <body>
         <h1>${checklist.title}</h1>
-        <p>Data utworzenia: ${new Date(checklist.createdAt).toLocaleString()}</p>
+        <p>Data utworzenia: ${new Date(checklist.createdAt).toLocaleString('pl-PL', { dateStyle: 'short', timeStyle: 'short' })}</p>
         <table>
           <thead>
             <tr><th>#</th><th>Zadanie</th><th>Status</th></tr>

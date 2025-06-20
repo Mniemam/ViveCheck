@@ -9,11 +9,11 @@ export default function HomeScreen() {
       <Text style={styles.title}>ViveCheck</Text>
 
       <View style={styles.buttonContainer}>
-        <Button title="➕ Nowa checklista" onPress={() => router.push('/checklista')} />
+        <Button title="➕ Nowa checklista" onPress={() => router.push('/screens/Checklist/ChecklistScreen')} />
       </View>
 
       <View style={styles.buttonContainer}>
-        <Button title="📄 Wykonane checklisty" onPress={() => router.push('/history')} />
+        <Button title="📄 Wykonane checklisty" onPress={() => router.push('/screens/Checklist/CompletedChecklistsScreen')} />
       </View>
     </View>
   );

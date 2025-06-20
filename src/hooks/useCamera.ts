@@ -1,7 +1,7 @@
 
 
 import * as ImagePicker from 'expo-image-picker';
-import { savePhotoToAppDirectory } from '../../android/src/storage/fileHelpers';
+import { savePhotoToAppDirectory } from '../storage/fileHelpers';
 
 /**
  * Hook do wykonania zdjęcia i zapisania go lokalnie
