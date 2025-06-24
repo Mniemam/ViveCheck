@@ -1,7 +1,7 @@
 // src/storage/fileHelpers.ts
 
 import * as FileSystem from 'expo-file-system';
-import { Platform } from 'react-native';
+// import { Platform } from 'react-native';
 // import { v4 as uuidv4 } from 'uuid';
 
 const PHOTO_DIR = `${FileSystem.documentDirectory}photos/`;

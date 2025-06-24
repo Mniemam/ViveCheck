@@ -1,32 +1,49 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Realm from 'realm';
-import { ChecklistSchema, Checklist } from '../../../src/realm/Checklist';
-import { TaskSchema } from '../../../src/realm/Task';
+import { getRealm } from '../../../src/data/realm';
+import { Checklist } from '../../../src/context/types';
 import { useRouter } from 'expo-router';
+import { useCurrentLocation } from '../../../src/hooks/useLocation';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function CompletedChecklistsScreen() {
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const router = useRouter();
+  const { getLocation } = useCurrentLocation();
 
-  useEffect(() => {
+  useFocusEffect(() => {
     let realmInstance: Realm | null = null;
-    Realm.open({ 
-      schema: [ChecklistSchema, TaskSchema],
-      schemaVersion: 4,
-      deleteRealmIfMigrationNeeded: true,
-    }).then(instance => {
+    getRealm().then(async (instance) => {
       realmInstance = instance;
       const all = instance.objects<Checklist>('Checklist').sorted('createdAt', true);
       setChecklists([...JSON.parse(JSON.stringify(all))]);
+
+      // Uzupełnienie city w tle
+      (async () => {
+        const missing = realmInstance!
+          .objects<Checklist>('Checklist')
+          .filtered('location != null AND (city == "" OR city == null)');
+        for (const cl of missing) {
+          try {
+            const fresh = await getLocation();
+            if (fresh?.city) {
+              realmInstance!.write(() => {
+                cl.city = fresh.city;
+              });
+            }
+          } catch {
+            // silently ignore
+          }
+        }
+      })();
     });
     return () => {
       if (realmInstance && !realmInstance.isClosed) {
-      realmInstance.close();
+        realmInstance.close();
       }
     };
-  }, []);
+  });
 
   return (
     <View style={styles.container}>
@@ -34,46 +51,51 @@ export default function CompletedChecklistsScreen() {
       <FlatList
         data={checklists}
         key={checklists.length}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.item}>
             <Pressable
               style={{ flex: 1 }}
-              onPress={() => router.push({ pathname: '/screens/Checklist/ChecklistDetailsScreen', params: { id: item.id } })}
+              onPress={() =>
+                router.push({
+                  pathname: '/screens/Checklist/ChecklistDetailsScreen',
+                  params: { id: item.id },
+                })
+              }
             >
               <Text style={styles.itemText}>{item.sklep || 'Brak nazwy sklepu'}</Text>
-                  <Text style={styles.date}>{item.createdAt ? new Date(item.createdAt).toLocaleString() : ''}</Text>
+              <Text style={styles.date}>
+                {item.createdAt ? new Date(item.createdAt).toLocaleString() : ''}
+              </Text>
             </Pressable>
             <Pressable
-              style={{ padding: 4, backgroundColor: 'transparent', borderRadius: 6, marginLeft: 8, alignSelf: 'center' }}
+              style={{
+                padding: 4,
+                backgroundColor: 'transparent',
+                borderRadius: 6,
+                marginLeft: 8,
+                alignSelf: 'center',
+              }}
               onPress={async () => {
-                // Usuwanie checklisty i powiązanych zadań
-                let realmInstance: Realm | undefined;
                 try {
-                realmInstance = await Realm.open({
-                schema: [ChecklistSchema, TaskSchema],
-                schemaVersion: 4,
-                deleteRealmIfMigrationNeeded: true,
-                });
-                realmInstance.write(() => {
-                // Usuń powiązane zadania
-                const tasksToDelete = realmInstance.objects('Task').filtered('checklistId == $0', item.id);
-                realmInstance.delete(tasksToDelete);
-                // Usuń checklistę
-                const checklistToDelete = realmInstance.objectForPrimaryKey('Checklist', item.id);
-                if (checklistToDelete) realmInstance.delete(checklistToDelete);
-                });
-                // Odśwież listę
-                const all = realmInstance.objects<Checklist>('Checklist').sorted('createdAt', true);
-                setChecklists([...JSON.parse(JSON.stringify(all))]);
+                  const realm = await getRealm();
+                  realm.write(() => {
+                    const tasksToDelete = realm
+                      .objects('Task')
+                      .filtered('checklistId == $0', item.id);
+                    realm.delete(tasksToDelete);
+                    const checklistToDelete = realm.objectForPrimaryKey('Checklist', item.id);
+                    if (checklistToDelete) realm.delete(checklistToDelete);
+                  });
+                  const all = realm
+                    .objects<Checklist>('Checklist')
+                    .sorted('createdAt', true);
+                  setChecklists([...JSON.parse(JSON.stringify(all))]);
+                  realm.close();
                 } catch (error) {
-                console.error('Błąd przy usuwaniu checklisty:', error);
-                } finally {
-                if (realmInstance && !realmInstance.isClosed) {
-                realmInstance.close();
+                  console.error('Błąd przy usuwaniu checklisty:', error);
                 }
-                }
-                }}
+              }}
             >
               <Ionicons name="trash-outline" size={20} color="#e74c3c" />
             </Pressable>

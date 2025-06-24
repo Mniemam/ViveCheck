@@ -21,11 +21,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(null);
   };
 
-  return (
-    <AuthContext.Provider value={{ token, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ token, login, logout }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

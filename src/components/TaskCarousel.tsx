@@ -7,9 +7,9 @@ import { styles as carouselStyles } from '../styles/Checklist/TaskCarousel.style
 type TaskCarouselProps = {
   tasks: Task[];
   screenWidth: number;
-  onChange?: (taskIndex: number, field: keyof Task, value: string | boolean) => void;
-  onAddPhoto?: (taskIndex: number) => void;
-  onSave?: (taskIndex: number) => void;
+  onChange?: (taskId: string, field: keyof Task, value: string | boolean | string[]) => void;
+  onAddPhoto?: (taskId: string) => void;
+  onSave?: (taskId: string) => void;
   readonly?: boolean;
 };
 
@@ -31,43 +31,23 @@ const TaskCarousel: React.FC<TaskCarouselProps> = ({
     setLocalTasks(tasks);
   }, [tasks]);
 
-  const updateTaskField = useCallback(
-    (index: number, field: keyof Task, value: string | boolean) => {
-      setLocalTasks(prev =>
-        prev.map((task, i) =>
-          i === index ? { ...task, [field]: value } : task
-        )
-      );
-    },
-    []
-  );
-
-  const handleCheckbox = (index: number) => {
-    updateTaskField(index, 'completed', !(localTasks[index].completed ?? false));
+  // Update a field in a task by id only
+  const updateTaskField = useCallback((taskId: string, field: keyof Task, value: any) => {
+    setLocalTasks((prev) =>
+      prev.map((task) => (task.id === taskId ? { ...task, [field]: value } : task)),
+    );
+  }, []);
+  const handleSave = (taskId: string) => {
+    const task = localTasks.find((t) => t.id === taskId);
+    if (!task) return;
+    // Validate and sanitize before passing to callbacks
+    const sanitizedKomentarz = (task.komentarz ?? '').replace(/[<>]/g, '');
+    const sanitizedOsobaOdpowiedzialna = (task.osobaOdpowiedzialna ?? '').replace(/[<>]/g, '');
+    onChange && onChange(taskId, 'komentarz', sanitizedKomentarz);
+    onChange && onChange(taskId, 'osobaOdpowiedzialna', sanitizedOsobaOdpowiedzialna);
+    onChange && onChange(taskId, 'photoUris', task.photoUris ?? []);
+    onSave && onSave(taskId);
   };
-
-  const handleSave = (index: number) => {
-    const task = localTasks[index];
-    onChange && onChange(index, 'completed', !!task.completed);
-    onChange && onChange(index, 'photoUri', task.photoUri ?? '');
-    onChange && onChange(index, 'komentarz', task.komentarz ?? '');
-    onChange && onChange(index, 'osobaOdpowiedzialna', task.osobaOdpowiedzialna ?? '');
-    onSave && onSave(index);
-  };
-
-  const renderCheckbox = (completed: boolean, onPress: () => void) => (
-    <Pressable
-      onPress={onPress}
-      style={[
-        localStyles.checkbox,
-        completed && localStyles.checkboxChecked,
-      ]}
-      accessibilityRole="checkbox"
-      accessibilityState={{ checked: !!completed }}
-    >
-      {completed && <Text style={localStyles.checkboxTick}>✓</Text>}
-    </Pressable>
-  );
 
   return (
     <Carousel
@@ -85,11 +65,9 @@ const TaskCarousel: React.FC<TaskCarouselProps> = ({
         >
           <View style={carouselStyles.headerContainer}>
             <Text style={carouselStyles.taskTitle}>
-              {index + 1}. {item.obszar || item.title || '(brak opisu)'}
+              {index + 1}. {item.title || '(brak opisu)'}
             </Text>
-            {!!item.termin && (
-              <Text style={carouselStyles.termin}>Termin: {item.termin}</Text>
-            )}
+            {!!item.termin && <Text style={carouselStyles.termin}>Termin: {item.termin}</Text>}
           </View>
 
           <TextInput
@@ -98,9 +76,10 @@ const TaskCarousel: React.FC<TaskCarouselProps> = ({
             value={item.komentarz ?? ''}
             multiline
             numberOfLines={6}
-            onChangeText={val => {
-              updateTaskField(index, 'komentarz', val);
-              onChange && onChange(index, 'komentarz', val);
+            onChangeText={(val) => {
+              const sanitizedVal = val.replace(/[<>]/g, ''); // simple sanitization example
+              updateTaskField(item.id, 'komentarz', sanitizedVal);
+              onChange && onChange(item.id, 'komentarz', sanitizedVal);
             }}
             editable={!readonly}
             blurOnSubmit={true}
@@ -111,9 +90,10 @@ const TaskCarousel: React.FC<TaskCarouselProps> = ({
             style={carouselStyles.input}
             placeholder="Osoba odpowiedzialna"
             value={item.osobaOdpowiedzialna ?? ''}
-            onChangeText={val => {
-              updateTaskField(index, 'osobaOdpowiedzialna', val);
-              onChange && onChange(index, 'osobaOdpowiedzialna', val);
+            onChangeText={(val) => {
+              const sanitizedVal = val.replace(/[<>]/g, '');
+              updateTaskField(item.id, 'osobaOdpowiedzialna', sanitizedVal);
+              onChange && onChange(item.id, 'osobaOdpowiedzialna', sanitizedVal);
             }}
             editable={!readonly}
             blurOnSubmit={true}
@@ -121,24 +101,38 @@ const TaskCarousel: React.FC<TaskCarouselProps> = ({
           />
 
           {!readonly && (
-            <Pressable style={carouselStyles.photoButton} onPress={() => onAddPhoto && onAddPhoto(index)}>
+            <Pressable
+              style={carouselStyles.photoButton}
+              onPress={() => onAddPhoto && onAddPhoto(item.id)}
+            >
               <Text style={carouselStyles.photoButtonText}>Dodaj zdjęcie</Text>
             </Pressable>
           )}
 
-          {!!item.photoUri && (
-            <Image source={{ uri: item.photoUri }} style={carouselStyles.photo} />
+          {item.photoUris && item.photoUris.length > 0 && (
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 }}>
+              {item.photoUris.map((uri) => (
+                <Image
+                  key={uri}
+                  source={{ uri }}
+                  style={{
+                    width: 80,
+                    height: 80,
+                    margin: 4,
+                    borderRadius: 6,
+                    borderWidth: 1,
+                    borderColor: '#ccc',
+                  }}
+                />
+              ))}
+            </View>
           )}
 
-          <View style={localStyles.row}>
-            {renderCheckbox(!!localTasks[index].completed, () => handleCheckbox(index))}
-            <Text>Wykonane</Text>
-          </View>
-
+          
           {!readonly && (
             <Pressable
               style={[carouselStyles.photoButton, localStyles.saveButton]}
-              onPress={() => handleSave(index)}
+              onPress={() => handleSave(item.id)}
             >
               <Text style={[carouselStyles.photoButtonText, { color: '#fff' }]}>Zapisz</Text>
             </Pressable>
@@ -155,26 +149,6 @@ const localStyles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 12,
     marginBottom: 4,
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderWidth: 1,
-    borderColor: '#888',
-    borderRadius: 4,
-    marginRight: 8,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxChecked: {
-    backgroundColor: '#2196F3',
-    borderColor: '#2196F3',
-  },
-  checkboxTick: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
   },
   saveButton: {
     marginTop: 12,

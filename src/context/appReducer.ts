@@ -6,18 +6,14 @@ export type State = {
   checklists: Checklist[];
 };
 
-export type Action =
-  | { type: 'ADD_CHECKLIST'; payload: Checklist }
-  // tu możesz dodać kolejne typy akcji (np. REMOVE_CHECKLIST, UPDATE_CHECKLIST itp.)
+export type Action = { type: 'ADD_CHECKLIST'; payload: Checklist };
+// tu możesz dodać kolejne typy akcji (np. REMOVE_CHECKLIST, UPDATE_CHECKLIST itp.)
 
 export const initialState: State = {
   checklists: [],
 };
 
-export default function appReducer(
-  state: State = initialState,
-  action: Action
-): State {
+export default function appReducer(state: State = initialState, action: Action): State {
   switch (action.type) {
     case 'ADD_CHECKLIST':
       return {

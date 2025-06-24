@@ -3,8 +3,6 @@ import { SafeAreaView, View, Pressable, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-
-
 export default function BottomNavBar() {
   const router = useRouter();
 
@@ -15,7 +13,10 @@ export default function BottomNavBar() {
           <Ionicons name="chevron-back" size={28} color="#fff" />
         </Pressable>
         <View style={styles.centerButtonWrapper}>
-          <Pressable onPress={() => router.replace('/screens/Home/HomeScreen')} style={styles.homeButton}>
+          <Pressable
+            onPress={() => router.replace('/screens/Home/HomeScreen')}
+            style={styles.homeButton}
+          >
             <Ionicons name="home" size={32} color="#fff" />
           </Pressable>
         </View>

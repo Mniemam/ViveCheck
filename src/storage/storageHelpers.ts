@@ -1,45 +1,20 @@
-type RealmChecklistItem = {
-  id: string;
-  title: string;
-  completed: boolean;
-};
-
-type RealmChecklist = {
-  id: string;
-  title: string;
-  createdAt: Date;
-  location?: {
-    latitude: number;
-    longitude: number;
-  };
-  items: RealmChecklistItem[];
-};
-
-import Realm from 'realm';
-import {
-  LocationSchema,
-  ChecklistItemSchema,
-  ChecklistSchema,
-} from '../context/types';
 import { Checklist } from '../context/types';
+import { Alert } from 'react-native';
+import { getRealm } from '../data/realm';
 
 /**
  * Zapisuje checklistę do bazy Realm
  */
 export const saveChecklist = async (checklist: Checklist) => {
-  let realm;
   try {
-    realm = await Realm.open({
-      path: 'checklists.realm',
-      schema: [LocationSchema, ChecklistItemSchema, ChecklistSchema],
-    });
+    const realm = await getRealm();
     realm.write(() => {
-      realm.create('Checklist', checklist, Realm.UpdateMode.Modified);
+      realm.create('Checklist', checklist, true);
     });
+    realm.close();
   } catch (error) {
-    console.error('Błąd zapisu checklisty:', error);
-  } finally {
-    realm?.close();
+    console.error('Błąd zapisu checklisty:', error, checklist);
+    Alert.alert('Błąd zapisu checklisty', String(error));
   }
 };
 
@@ -47,29 +22,30 @@ export const saveChecklist = async (checklist: Checklist) => {
  * Pobiera wszystkie zapisane checklisty
  */
 export const loadChecklists = async (): Promise<Checklist[]> => {
-  let realm;
   try {
-    realm = await Realm.open({
-      path: 'checklists.realm',
-      schema: [LocationSchema, ChecklistItemSchema, ChecklistSchema],
-    });
-    const data = realm.objects<RealmChecklist>('Checklist');
-    const checklists = data.map(item => ({
+    const realm = await getRealm();
+    const raw = realm.objects<any>('Checklist');
+    // Mapujemy obiekty Realm na typ Checklist
+    return raw.map((item) => ({
       id: item.id,
-      title: item.title,
+      sklep: item.sklep,
+      mr: item.mr,
+      prowadzacaZmiane: item.prowadzacaZmiane,
+      prognozaPodstawowy: item.prognozaPodstawowy,
+      prognozaKomplementarny: item.prognozaKomplementarny,
+      skutecznoscChemii: item.skutecznoscChemii,
       createdAt: item.createdAt,
-      location: item.location,
-      items: item.items?.map(sub => ({
-        id: sub.id,
+      location: item.location || { latitude: 0, longitude: 0 },
+      photoUri: item.photoUri || '',
+      items: item.items.map((sub: any) => ({
         title: sub.title,
         completed: sub.completed,
-      })) ?? [],
+        komentarz: sub.komentarz || '',
+        osobaOdpowiedzialna: sub.osobaOdpowiedzialna || '',
+      })),
     }));
-    return checklists;
   } catch (error) {
     console.error('Błąd odczytu checklist:', error);
     return [];
-  } finally {
-    realm?.close();
   }
 };

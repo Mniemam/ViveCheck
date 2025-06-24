@@ -4,17 +4,11 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
+    "module": "esnext",
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": ["src/*"]
     }
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-  ]
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "app/screens/History/HistoryScreen.tsx.bak", "app/screens/Checklist/ChecklistDetails.tsx.old", "app/screens/Checklist/TaskDetailsScreen.tsx_OLD.old"]
 }

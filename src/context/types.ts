@@ -2,60 +2,39 @@ export type Task = {
   id: string;
   checklistId?: string;
   title: string;
-  completed: boolean;
-  photoUri?: string;
+  photoUris?: string[];
   description?: string;
   value?: string;
-  obszar?: string;
   termin?: string;
   komentarz?: string;
   osobaOdpowiedzialna?: string;
   category?: string;
 };
 
-
 export type Location = {
   latitude: number;
   longitude: number;
 };
 
-export const LocationSchema: Realm.ObjectSchema = {
-  name: 'Location',
-  properties: {
-    latitude: 'double',
-    longitude: 'double',
-  },
-};
-
 export type ChecklistItem = {
   id: string;
-  text: string;
+  title: string;
   completed: boolean;
-};
-
-export const ChecklistItemSchema: Realm.ObjectSchema = {
-  name: 'ChecklistItem',
-  properties: {
-    id: 'string',
-    text: 'string',
-    completed: 'bool',
-  },
+  komentarz?: string;
+  osobaOdpowiedzialna?: string;
 };
 
 export type Checklist = {
   id: string;
-  title: string;
-  location: Location;
+  sklep: string;
+  mr?: string;
+  prowadzacaZmiane?: string;
+  prognozaPodstawowy?: string;
+  prognozaKomplementarny?: string;
+  skutecznoscChemii?: string;
+  createdAt: Date;
+  location?: Location;
+  photoUri?: string;
+  city?: string;
   items: ChecklistItem[];
-};
-
-export const ChecklistSchema: Realm.ObjectSchema = {
-  name: 'Checklist',
-  primaryKey: 'id',
-  properties: {
-    id: 'string',
-    title: 'string',
-    location: 'Location',
-    items: 'ChecklistItem[]',
-  },
 };

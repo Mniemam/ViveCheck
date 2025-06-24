@@ -1,5 +1,3 @@
-
-
 import { ObjectSchema } from 'realm';
 
 export const checklistItemSchema: ObjectSchema = {

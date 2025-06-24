@@ -1,0 +1,6 @@
+[typescriptreact]
+testingFramework = "Jest"
+mockingFramework = "jest.mock"
+
+[typescript]
+testingFramework = "Jest"

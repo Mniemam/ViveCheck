@@ -14,7 +14,7 @@ export default function LoginScreen() {
       await login(username, password);
       router.replace('/screens/Home/HomeScreen');
     } catch (e) {
-      // tu możesz pokazać alert o błędzie
+      
       console.error(e);
     }
   };
@@ -48,13 +48,13 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#eee',        // np. #eee albo inny kolor tła
+    backgroundColor: '#eee', // np. #eee albo inny kolor tła
     justifyContent: 'center',
     alignItems: 'center',
   },
   card: {
     width: '80%',
-    backgroundColor: '#bae1ff',     // jasnoniebieski
+    backgroundColor: '#bae1ff', // jasnoniebieski
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',

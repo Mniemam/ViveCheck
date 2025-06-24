@@ -1,5 +1,3 @@
-
-
 import * as ImagePicker from 'expo-image-picker';
 import { savePhotoToAppDirectory } from '../storage/fileHelpers';
 

@@ -4,11 +4,13 @@ import { useRouter } from 'expo-router';
 import { initialCategories, Category } from '../../../src/data/categories';
 import { useLocalSearchParams } from 'expo-router';
 
-const CategoryButton = React.memo(({ item, onPress }: { item: Category; onPress: (item: Category) => void }) => (
-  <Pressable style={styles.categoryButton} onPress={() => onPress(item)}>
-    <Text style={styles.categoryButtonText}>{item.title}</Text>
-  </Pressable>
-));
+const CategoryButton = React.memo(
+  ({ item: category, onPress }: { item: Category; onPress: (category: Category) => void }) => (
+    <Pressable style={styles.categoryButton} onPress={() => onPress(category)}>
+      <Text style={styles.categoryButtonText}>{category.title}</Text>
+    </Pressable>
+  ),
+);
 
 export default function CategoryCheckScreen() {
   const router = useRouter();
@@ -17,7 +19,7 @@ export default function CategoryCheckScreen() {
   const readonly = params.readonly === 'true';
   const editMode = params.editMode === 'true';
   const handleSelectCategory = (category: Category) => {
-    // Przekieruj do TaskCarouselScreen z checklistId, trybem i kategorią
+    // Przekieruj do TaskCarouselScreen z checklistId
     router.push({
       pathname: '/screens/Checklist/TaskCarouselScreen',
       params: {
@@ -59,7 +61,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   categoryButton: {
-    backgroundColor: '#73c0d7',
+    backgroundColor: '#4678c0',
     padding: 14,
     marginVertical: 6,
     borderRadius: 6,

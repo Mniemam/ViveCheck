@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { loadChecklists, saveChecklist } from '../storage/storageHelpers';
 
-
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import appReducer from './appReducer';
 import { AppState, AppAction } from './types';
@@ -51,9 +50,5 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     load();
   }, []);
 
-  return (
-    <AppContext.Provider value={{ state, dispatch }}>
-      {children}
-    </AppContext.Provider>
-  );
+  return <AppContext.Provider value={{ state, dispatch }}>{children}</AppContext.Provider>;
 };
