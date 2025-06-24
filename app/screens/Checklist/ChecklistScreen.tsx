@@ -163,15 +163,18 @@ export default function ChecklistaFormScreen() {
               style={styles.nextButton}
               onPress={async () => {
                 // weryfikacja GPS 
+                let latitude = 0;
+                let longitude = 0;
+                let cityName = '';
                 if (!cachedLoc) {
-                  Alert.alert('Brak zasięgu GPS', 'Proszę włączyć GPS i spróbować ponownie.');
-                  return;
+                  Alert.alert('Brak zasięgu GPS', 'Nie udało się pobrać lokalizacji. Przechodzisz dalej bez lokalizacji.');
+                } else {
+                  latitude = cachedLoc.latitude;
+                  longitude = cachedLoc.longitude;
+                  cityName = cachedLoc.city;
                 }
                 try {
                   const realm = await getRealm();
-                  const latitude = cachedLoc.latitude;
-                  const longitude = cachedLoc.longitude;
-                  const cityName = cachedLoc.city;
 
                   if (!sklep.trim()) {
                     Alert.alert('Podaj numer sklepu');

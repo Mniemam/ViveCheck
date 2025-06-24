@@ -14,7 +14,7 @@ export const saveChecklist = async (checklist: Checklist) => {
     realm.close();
   } catch (error) {
     console.error('Błąd zapisu checklisty:', error, checklist);
-    Alert.alert('Błąd zapisu checklisty', String(error));
+    // Alert usunięty: nie wywołuj dialogów w helperach
   }
 };
 

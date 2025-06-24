@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, FlatList, Pressable, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getRealm } from '../../../src/data/realm';
 import { Checklist } from '../../../src/context/types';
@@ -7,37 +7,73 @@ import { useRouter } from 'expo-router';
 import { useCurrentLocation } from '../../../src/hooks/useLocation';
 import { useFocusEffect } from '@react-navigation/native';
 
+// Prosta funkcja sprawdzająca połączenie z internetem z timeoutem
+async function isOnline() {
+  const timeout = 3000;
+  try {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    const response = await fetch('https://www.google.com', { method: 'HEAD', signal: controller.signal });
+    clearTimeout(id);
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+// Placeholder synchronizacji checklist
+async function syncChecklistsIfNeeded() {
+  // Tu można dodać logikę synchronizacji z backendem
+  // Np. wysyłanie lokalnych checklist na serwer
+  // Na razie tylko symulacja
+  return true;
+}
+
 export default function CompletedChecklistsScreen() {
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const router = useRouter();
   const { getLocation } = useCurrentLocation();
 
+  // Flaga, by uzupełnianie city wykonało się tylko raz po wejściu na ekran
+  const cityUpdateDone = useRef(false);
+
   useFocusEffect(() => {
     let realmInstance: Realm | null = null;
+    // Pobierz checklisty natychmiast
     getRealm().then(async (instance) => {
       realmInstance = instance;
       const all = instance.objects<Checklist>('Checklist').sorted('createdAt', true);
       setChecklists([...JSON.parse(JSON.stringify(all))]);
 
-      // Uzupełnienie city w tle
-      (async () => {
-        const missing = realmInstance!
-          .objects<Checklist>('Checklist')
-          .filtered('location != null AND (city == "" OR city == null)');
-        for (const cl of missing) {
-          try {
-            const fresh = await getLocation();
-            if (fresh?.city) {
-              realmInstance!.write(() => {
-                cl.city = fresh.city;
-              });
+      // Uzupełnienie city tylko raz po wejściu na ekran
+      if (!cityUpdateDone.current) {
+        cityUpdateDone.current = true;
+        (async () => {
+          const missing = realmInstance!
+            .objects<Checklist>('Checklist')
+            .filtered('location != null AND (city == "" OR city == null)');
+          for (const cl of missing) {
+            try {
+              const fresh = await getLocation();
+              if (fresh?.city) {
+                realmInstance!.write(() => {
+                  cl.city = fresh.city;
+                });
+              }
+            } catch {
+              // silently ignore
             }
-          } catch {
-            // silently ignore
           }
-        }
-      })();
+        })();
+      }
     });
+    // Sprawdź internet i synchronizuj w tle
+    (async () => {
+      const online = await isOnline();
+      if (online) {
+        await syncChecklistsIfNeeded();
+      }
+    })();
     return () => {
       if (realmInstance && !realmInstance.isClosed) {
         realmInstance.close();
