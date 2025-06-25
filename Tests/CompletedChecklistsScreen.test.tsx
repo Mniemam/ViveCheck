@@ -1,4 +1,20 @@
 import React from 'react';
+
+// Wyciszenie ostrzeżeń act() w testach
+const originalError = console.error;
+beforeAll(() => {
+  console.error = (...args) => {
+    if (typeof args[0] === 'string' && args[0].includes('Warning: An update to')) {
+      return;
+    }
+    originalError.call(console, ...args);
+  };
+});
+
+afterAll(() => {
+  console.error = originalError;
+});
+
 jest.mock('@expo/vector-icons', () => {
   const React = require('react');
   const { View } = require('react-native');

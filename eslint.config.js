@@ -6,7 +6,7 @@ import tsparser from '@typescript-eslint/parser';
 export default [
   js.configs.recommended,
   {
-    files: ['src/**/*.ts', 'src/**/*.tsx', 'app/**/*.ts', 'app/**/*.tsx'],
+    files: ['src/**/*.ts', 'src/**/*.tsx', 'app/**/*.ts', 'app/**/*.tsx', 'Tests/**/*.ts', 'Tests/**/*.tsx'],
     languageOptions: {
       parser: tsparser,
       globals: {
@@ -29,6 +29,16 @@ export default [
         Blob: 'readonly',
         FileReader: 'readonly',
         __d: 'readonly',
+        Realm: 'readonly',
+        AbortController: 'readonly',
+        jest: 'readonly',
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
       },
     },
     plugins: {
@@ -36,10 +46,29 @@ export default [
       react,
     },
     rules: {
-      // Możesz dodać własne reguły
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['off', { 
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        ignoreRestSiblings: true
+      }],
+      'no-undef': 'off', // TypeScript już to sprawdza
     },
     settings: {
       react: { version: 'detect' },
+    },
+  },
+  {
+    files: ['**/*.js', '**/*.jsx'],
+    languageOptions: {
+      globals: {
+        module: 'readonly',
+        exports: 'readonly',
+        require: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        process: 'readonly',
+      },
     },
   },
   {
