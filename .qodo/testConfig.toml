@@ -4,3 +4,4 @@ mockingFramework = "jest.mock"
 
 [typescript]
 testingFramework = "Jest"
+mockingFramework = "Jest mocks"

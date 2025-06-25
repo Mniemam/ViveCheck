@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1750801137195" clover="3.2.0">
+  <project timestamp="1750801137196" name="All files">
+    <metrics statements="41" coveredstatements="35" conditionals="19" coveredconditionals="11" methods="10" coveredmethods="8" elements="70" coveredelements="54" complexity="0" loc="41" ncloc="41" packages="4" files="4" classes="4"/>
+    <package name="app.screens.Checklist">
+      <metrics statements="13" coveredstatements="13" conditionals="4" coveredconditionals="2" methods="6" coveredmethods="6"/>
+      <file name="CategoryCheckScreen.tsx" path="/Users/olo/ViveCheck/app/screens/Checklist/CategoryCheckScreen.tsx">
+        <metrics statements="13" coveredstatements="13" conditionals="4" coveredconditionals="2" methods="6" coveredmethods="6"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="9" count="42" type="stmt"/>
+        <line num="16" count="6" type="stmt"/>
+        <line num="17" count="6" type="stmt"/>
+        <line num="18" count="6" type="stmt"/>
+        <line num="19" count="6" type="stmt"/>
+        <line num="20" count="6" type="stmt"/>
+        <line num="21" count="6" type="stmt"/>
+        <line num="23" count="1" type="stmt"/>
+        <line num="34" count="6" type="stmt"/>
+        <line num="39" count="48" type="stmt"/>
+        <line num="40" count="42" type="stmt"/>
+        <line num="47" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.context">
+      <metrics statements="4" coveredstatements="4" conditionals="3" coveredconditionals="2" methods="1" coveredmethods="1"/>
+      <file name="appReducer.ts" path="/Users/olo/ViveCheck/src/context/appReducer.ts">
+        <metrics statements="4" coveredstatements="4" conditionals="3" coveredconditionals="2" methods="1" coveredmethods="1"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="17" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="19" count="5" type="stmt"/>
+        <line num="24" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.data">
+      <metrics statements="3" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="0"/>
+      <file name="categories.ts" path="/Users/olo/ViveCheck/src/data/categories.ts">
+        <metrics statements="3" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="0"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="277" count="1" type="stmt"/>
+        <line num="278" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.storage">
+      <metrics statements="21" coveredstatements="16" conditionals="12" coveredconditionals="7" methods="1" coveredmethods="1"/>
+      <file name="fileHelpers.ts" path="/Users/olo/ViveCheck/src/storage/fileHelpers.ts">
+        <metrics statements="21" coveredstatements="16" conditionals="12" coveredconditionals="7" methods="1" coveredmethods="1"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="14" count="7" type="stmt"/>
+        <line num="16" count="7" type="stmt"/>
+        <line num="17" count="7" type="cond" truecount="1" falsecount="1"/>
+        <line num="18" count="0" type="stmt"/>
+        <line num="22" count="7" type="cond" truecount="1" falsecount="1"/>
+        <line num="23" count="7" type="cond" truecount="3" falsecount="1"/>
+        <line num="25" count="7" type="stmt"/>
+        <line num="26" count="7" type="stmt"/>
+        <line num="29" count="7" type="stmt"/>
+        <line num="32" count="7" type="stmt"/>
+        <line num="33" count="7" type="cond" truecount="1" falsecount="1"/>
+        <line num="34" count="0" type="stmt"/>
+        <line num="35" count="0" type="stmt"/>
+        <line num="39" count="7" type="stmt"/>
+        <line num="46" count="7" type="stmt"/>
+        <line num="47" count="7" type="cond" truecount="1" falsecount="1"/>
+        <line num="48" count="7" type="stmt"/>
+        <line num="50" count="7" type="stmt"/>
+        <line num="52" count="0" type="stmt"/>
+        <line num="53" count="0" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>

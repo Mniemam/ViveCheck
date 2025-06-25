@@ -6,7 +6,7 @@ import * as Sharing from 'expo-sharing';
 import { getRealm } from '../../../src/data/realm';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Checklist, Task } from '../../../src/context/types';
-
+import { generateChecklistHTML } from '../../../src/utils/pdfTemplate';
 
 export default function ChecklistDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -164,37 +164,7 @@ export default function ChecklistDetailsScreen() {
                 {} as Record<string, any[]>,
               );
               // Wygeneruj HTML
-              const html = `
-              <h1>Checklista: ${checklist.sklep}</h1>
-              <p><b>Data:</b> ${checklist.createdAt ? checklist.createdAt.toLocaleString() : '-'}</p>
-              <p><b>MR:</b> ${checklist.mr || '-'}<br/>
-              <b>Prowadząca zmianę:</b> ${checklist.prowadzacaZmiane || '-'}<br/>
-              <b>% prognoza (asort. podstawowy):</b> ${checklist.prognozaPodstawowy || '-'}<br/>
-              <b>% prognoza (asort. komplementarny):</b> ${checklist.prognozaKomplementarny || '-'}<br/>
-              <b>% skuteczność sprzedaży chemii:</b> ${checklist.skutecznoscChemii || '-'}<br/></p>
-              <h2>Zadania wg kategorii:</h2>
-              ${Object.entries(grouped)
-                .map(
-                  ([cat, tasks]) => `
-                <h3>${cat}</h3>
-                <ul>
-                  ${tasks
-                    .map(
-                      (task) => `
-                    <li style="margin-bottom:16px;">
-                      <b>${task.title || '(brak opisu)'}</b><br/>
-                      ${task.photoBase64Arr && task.photoBase64Arr.length > 0 ? task.photoBase64Arr.map((img: string) => `<img src="${img}" style="max-width:300px;max-height:200px;" /><br/>`).join('') : ''}
-                      <b>Opis:</b> ${task.komentarz || '-'}<br/>
-                      <b>Wykonał:</b> ${task.osobaOdpowiedzialna || '-'}<br/>
-                    </li>
-                  `,
-                    )
-                    .join('')}
-                </ul>
-              `,
-                )
-                .join('')}
-            `;
+              const html = generateChecklistHTML(checklist, grouped);
               const pdf = await RNHTMLtoPDF.convert({
                 html,
                 fileName: `checklista_${checklist.sklep}_${checklist.id}`,
@@ -209,8 +179,7 @@ export default function ChecklistDetailsScreen() {
               } else {
                 Alert.alert(
                   'PDF zapisany',
-                  `Plik PDF zapisany w:
-${pdf.filePath}`,
+                  `Plik PDF zapisany w:\n${pdf.filePath}`,
                 );
               }
             } catch (e) {

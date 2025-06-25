@@ -4,7 +4,9 @@ import * as FileSystem from 'expo-file-system';
 // import { Platform } from 'react-native';
 // import { v4 as uuidv4 } from 'uuid';
 
-const PHOTO_DIR = `${FileSystem.documentDirectory}photos/`;
+const PHOTO_DIR = FileSystem.documentDirectory
+  ? `${FileSystem.documentDirectory}photos/`
+  : null;
 
 /**
  * Kopiuje zdjęcie podane przez URI do wewnętrznego folderu aplikacji
@@ -12,6 +14,16 @@ const PHOTO_DIR = `${FileSystem.documentDirectory}photos/`;
  */
 export async function savePhotoToAppDirectory(uri: string): Promise<string | null> {
   try {
+    if (!PHOTO_DIR) {
+      console.error('FileSystem.documentDirectory is undefined.');
+      return null;
+    }
+    // Walidacja wejścia
+    if (!uri || typeof uri !== 'string' || uri.trim() === '') {
+      console.error('Nieprawidłowy URI:', uri);
+      return null;
+    }
+
     // Upewnij się, że katalog istnieje
     const dirInfo = await FileSystem.getInfoAsync(PHOTO_DIR);
     if (!dirInfo.exists) {
@@ -19,7 +31,7 @@ export async function savePhotoToAppDirectory(uri: string): Promise<string | nul
     }
 
     // NIE usuwaj file:// z uri źródłowego – FileSystem.copyAsync wymaga pełnego URI
-    const rawName = uri.split('/').pop() ?? `${Date.now()}`;
+    const rawName = (uri && uri.split('/').pop()) || `${Date.now()}`;
     const ext = (rawName && rawName.includes('.') && rawName.split('.').pop()) || 'jpg';
     // Unikalna nazwa pliku bez uuid (kompatybilna z React Native)
     const fileName = `photo_${Date.now()}_${Math.floor(Math.random() * 1e6)}.${ext}`;
