@@ -4,13 +4,12 @@ import * as FileSystem from 'expo-file-system';
 // import { Platform } from 'react-native';
 // import { v4 as uuidv4 } from 'uuid';
 
-const PHOTO_DIR = FileSystem.documentDirectory
-  ? `${FileSystem.documentDirectory}photos/`
-  : null;
+const PHOTO_DIR = FileSystem.documentDirectory ? `${FileSystem.documentDirectory}photos/` : null;
 
 /**
- * Kopiuje zdjęcie podane przez URI do wewnętrznego folderu aplikacji
- * i zwraca nową ścieżkę pliku.
+ * Kopiuje zdjęcie z podanego identyfikatora URI do wewnętrznego katalogu aplikacji i zwraca nową ścieżkę pliku.
+ * @param {string} uri - Identyfikator URI zdjęcia do zapisania.
+ * @returns {Promise<string | null>} Obietnica, która zwraca nową ścieżkę pliku lub null w przypadku błędu.
  */
 export async function savePhotoToAppDirectory(uri: string): Promise<string | null> {
   try {

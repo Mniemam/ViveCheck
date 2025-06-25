@@ -14,7 +14,6 @@ export default function LoginScreen() {
       await login(username, password);
       router.replace('/screens/Home/HomeScreen');
     } catch (e) {
-      
       console.error(e);
     }
   };

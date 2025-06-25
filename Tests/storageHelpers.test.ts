@@ -1,17 +1,21 @@
 jest.mock('../src/data/realm', () => {
   const store: Record<string, any[]> = { Checklist: [] };
   const fakeRealm = {
-    write: (cb: Function) => { cb(); },
-    create: (type: string, data: any) => { store[type].push({ ...data }); },
+    write: (cb: Function) => {
+      cb();
+    },
+    create: (type: string, data: any) => {
+      store[type].push({ ...data });
+    },
     objects: (type: string) => {
       const arr = store[type];
       // Dodaj metodę filtered do tablicy
       // @ts-ignore
-      arr.filtered = (_query: string, id: any) => arr.filter(item => item.id === id);
+      arr.filtered = (_query: string, id: any) => arr.filter((item) => item.id === id);
       return arr;
     },
     delete: (items: any[]) => {
-      items.forEach(item => {
+      items.forEach((item) => {
         const idx = store['Checklist'].indexOf(item);
         if (idx !== -1) store['Checklist'].splice(idx, 1);
       });
@@ -116,7 +120,7 @@ describe('saveChecklist', () => {
     const checklists = await loadChecklists();
 
     // Znajdź wstawioną checklistę
-    const loaded = checklists.find(c => c.id === checklistData.id);
+    const loaded = checklists.find((c) => c.id === checklistData.id);
 
     expect(loaded).toBeDefined();
     expect(loaded!.sklep).toBe(checklistData.sklep);

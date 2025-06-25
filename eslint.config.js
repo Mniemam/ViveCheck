@@ -6,7 +6,14 @@ import tsparser from '@typescript-eslint/parser';
 export default [
   js.configs.recommended,
   {
-    files: ['src/**/*.ts', 'src/**/*.tsx', 'app/**/*.ts', 'app/**/*.tsx', 'Tests/**/*.ts', 'Tests/**/*.tsx'],
+    files: [
+      'src/**/*.ts',
+      'src/**/*.tsx',
+      'app/**/*.ts',
+      'app/**/*.tsx',
+      'Tests/**/*.ts',
+      'Tests/**/*.tsx',
+    ],
     languageOptions: {
       parser: tsparser,
       globals: {
@@ -47,11 +54,14 @@ export default [
     },
     rules: {
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': ['off', { 
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-        ignoreRestSiblings: true
-      }],
+      '@typescript-eslint/no-unused-vars': [
+        'off',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+        },
+      ],
       'no-undef': 'off', // TypeScript już to sprawdza
     },
     settings: {

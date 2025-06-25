@@ -1,10 +1,20 @@
 import { Task } from '../context/types';
 
+/**
+ * Reprezentuje kategorię zadań.
+ * @typedef {object} Category
+ * @property {string} title - Tytuł kategorii.
+ * @property {Task[]} tasks - Tablica zadań należących do kategorii.
+ */
 export type Category = {
   title: string;
   tasks: Task[];
 };
 
+/**
+ * Tablica predefiniowanych kategorii z ich początkowymi zadaniami.
+ * @type {Category[]}
+ */
 export const initialCategories: Category[] = [
   {
     title: 'STREFA WEJŚCIA',
@@ -215,7 +225,8 @@ export const initialCategories: Category[] = [
       },
       {
         id: '30',
-        title: 'Czystość w pomieszczeniu biurowym (dot. pozostawionej odzieży i towaru na sprzedaż)',
+        title:
+          'Czystość w pomieszczeniu biurowym (dot. pozostawionej odzieży i towaru na sprzedaż)',
         komentarz: '',
         osobaOdpowiedzialna: '',
       },
@@ -274,5 +285,10 @@ export const initialCategories: Category[] = [
   },
 ];
 
+/**
+ * Znajduje kategorię po jej tytule.
+ * @param {string} title - Tytuł kategorii do znalezienia.
+ * @returns {Category | undefined} Obiekt kategorii, jeśli zostanie znaleziony, w przeciwnym razie undefined.
+ */
 export const getCategoryByTitle = (title: string): Category | undefined =>
   initialCategories.find((cat) => cat.title === title);

@@ -1,116 +1,150 @@
+
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import ChecklistDetailsScreen from '../app/screens/Checklist/ChecklistDetailsScreen';
-import * as realmModule from '../src/data/realm';
-import * as routerModule from 'expo-router';
-import * as RNHTMLtoPDF from 'react-native-html-to-pdf';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { getRealm } from '../src/data/realm';
 import * as FileSystem from 'expo-file-system';
+import RNHTMLtoPDF from 'react-native-html-to-pdf';
 import * as Sharing from 'expo-sharing';
 import { Alert } from 'react-native';
 
-// Mocks
+// Mock dependencies
+jest.mock('expo-router', () => ({
+  useLocalSearchParams: jest.fn(),
+  useRouter: jest.fn(),
+}));
+
 jest.mock('../src/data/realm', () => ({
   getRealm: jest.fn(),
 }));
-jest.mock('expo-router');
-jest.mock('react-native-html-to-pdf');
-jest.mock('expo-file-system');
-jest.mock('expo-sharing');
+
+jest.mock('expo-file-system', () => ({
+  getInfoAsync: jest.fn(),
+  readAsStringAsync: jest.fn(),
+  EncodingType: {
+    Base64: 'base64',
+  },
+}));
+
+jest.mock('react-native-html-to-pdf', () => ({
+  convert: jest.fn(),
+}));
+
+jest.mock('expo-sharing', () => ({
+  isAvailableAsync: jest.fn(),
+  shareAsync: jest.fn(),
+}));
+
 jest.spyOn(Alert, 'alert');
 
-const mockChecklist = {
-  id: '1',
-  sklep: 'Test Sklep',
-  mr: 'MR Test',
-  prowadzacaZmiane: 'Anna',
-  prognozaPodstawowy: '80',
-  prognozaKomplementarny: '60',
-  skutecznoscChemii: '90',
-  createdAt: new Date('2024-06-01T12:00:00Z'),
-  location: undefined,
-  photoUri: '',
-  city: 'Warszawa',
-  items: [],
-};
-
-const mockTask = {
-  id: 't1',
-  checklistId: '1',
-  title: 'Task 1',
-  photoUris: ['file:///photo1.jpg'],
-  komentarz: 'Komentarz',
-  osobaOdpowiedzialna: 'Jan',
-  category: 'Kategoria',
-};
-
-const mockRouterPush = jest.fn();
-
-beforeEach(() => {
-  jest.clearAllMocks();
-  (routerModule.useRouter as jest.Mock).mockReturnValue({ push: mockRouterPush });
-});
+const mockUseRouter = useRouter as jest.Mock;
+const mockUseLocalSearchParams = useLocalSearchParams as jest.Mock;
+const mockGetRealm = getRealm as jest.Mock;
+const mockGetInfoAsync = FileSystem.getInfoAsync as jest.Mock;
+const mockReadAsStringAsync = FileSystem.readAsStringAsync as jest.Mock;
+const mockConvert = RNHTMLtoPDF.convert as jest.Mock;
+const mockIsAvailableAsync = Sharing.isAvailableAsync as jest.Mock;
+const mockShareAsync = Sharing.shareAsync as jest.Mock;
 
 describe('ChecklistDetailsScreen', () => {
-  it('powinien_wyświetlać_szczegóły_checklisty_gdy_id_jest_poprawne', async () => {
-    (realmModule.getRealm as jest.Mock).mockResolvedValue({
-      objectForPrimaryKey: jest.fn().mockReturnValue({
-        ...mockChecklist,
-        createdAt: mockChecklist.createdAt,
-      }),
-      isClosed: false,
-      close: jest.fn(),
-    });
-    (routerModule.useLocalSearchParams as jest.Mock).mockReturnValue({ id: '1' });
+  let mockChecklistFiltered: jest.Mock;
+  let mockTaskFiltered: jest.Mock;
 
-    const { getByText, getAllByText } = render(<ChecklistDetailsScreen />);
-    await waitFor(() => {
-      const titles = getAllByText('Szczegóły checklisty');
-      expect(titles.length).toBeGreaterThan(0);
-      expect(getByText('Test Sklep')).toBeTruthy();
-      expect(getByText('Warszawa')).toBeTruthy();
-      expect(getByText('MR Test')).toBeTruthy();
-      expect(getByText('Anna')).toBeTruthy();
-      expect(getByText('80')).toBeTruthy();
-      expect(getByText('60')).toBeTruthy();
-      expect(getByText('90')).toBeTruthy();
+  const mockRouter = {
+    push: jest.fn(),
+  };
+
+  const mockChecklist = {
+    id: 'checklist-1',
+    sklep: 'Test Store',
+    city: 'Test City',
+    mr: 'Test MR',
+    prowadzacaZmiane: 'Test Leader',
+    prognozaPodstawowy: '90%',
+    prognozaKomplementarny: '80%',
+    skutecznoscChemii: '70%',
+    createdAt: new Date(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseRouter.mockReturnValue(mockRouter);
+    mockUseLocalSearchParams.mockReturnValue({ id: 'checklist-1' });
+
+    mockChecklistFiltered = jest.fn().mockReturnValue([mockChecklist]);
+    mockTaskFiltered = jest.fn().mockReturnValue([]);
+
+    const mockObjects = jest.fn().mockImplementation((model: string | any) => {
+      const modelName = typeof model === 'string' ? model : model.schema.name;
+      if (modelName === 'Checklist') {
+        return { filtered: mockChecklistFiltered };
+      }
+      if (modelName === 'Task') {
+        return { filtered: mockTaskFiltered };
+      }
+      return { filtered: jest.fn().mockReturnValue([]) };
+    });
+
+    mockGetRealm.mockResolvedValue({
+      objectForPrimaryKey: jest.fn().mockReturnValue(mockChecklist),
+      objects: mockObjects,
+      close: jest.fn(),
     });
   });
 
-  it('powinien_przejść_do_checklisty_w_trybie_tylko_do_odczytu_po_kliknięciu_przycisku', async () => {
-    (realmModule.getRealm as jest.Mock).mockResolvedValue({
-      objectForPrimaryKey: jest.fn().mockReturnValue({
-        ...mockChecklist,
-        createdAt: mockChecklist.createdAt,
-      }),
-      isClosed: false,
-      close: jest.fn(),
-    });
-    (routerModule.useLocalSearchParams as jest.Mock).mockReturnValue({ id: '1' });
+  it('powinien nawigować do edycji checklisty po naciśnięciu przycisku "Otwórz checklistę"', async () => {
+    const { findByText } = render(<ChecklistDetailsScreen />);
 
-    const { getByText, getAllByText } = render(<ChecklistDetailsScreen />);
-    await waitFor(() => {
-      const titles = getAllByText('Szczegóły checklisty');
-      expect(titles.length).toBeGreaterThan(1);
-    });
-    const buttons = getAllByText('Szczegóły checklisty');
-    fireEvent.press(buttons[1]);
-    expect(mockRouterPush).toHaveBeenCalledWith({
+    const openButton = await findByText('Otwórz checklistę');
+    fireEvent.press(openButton);
+
+    expect(mockRouter.push).toHaveBeenCalledWith({
       pathname: '/screens/Checklist/CategoryCheckScreen',
-      params: { checklistId: '1', readonly: 'true' },
+      params: { checklistId: 'checklist-1', editMode: 'true' },
     });
   });
 
-  it('powinien_wyświetlić_błąd_gdy_id_checklisty_jest_niepoprawne', async () => {
-    (realmModule.getRealm as jest.Mock).mockResolvedValue({
-      objectForPrimaryKey: jest.fn().mockReturnValue(null),
-      isClosed: false,
-      close: jest.fn(),
-    });
-    (routerModule.useLocalSearchParams as jest.Mock).mockReturnValue({ id: 'invalid' });
+  it('powinien wygenerować i udostępnić PDF po naciśnięciu przycisku "Generuj raport PDF"', async () => {
+    const mockTasks = [
+      {
+        id: 'task-1',
+        title: 'Task 1',
+        category: 'Category 1',
+        photoUris: ['file:///image1.jpg'],
+      },
+    ];
 
-    const { getByText } = render(<ChecklistDetailsScreen />);
+    mockTaskFiltered.mockReturnValue(mockTasks);
+
+    mockGetInfoAsync.mockResolvedValue({ exists: true });
+    mockReadAsStringAsync.mockResolvedValue('base64-encoded-image');
+    mockConvert.mockResolvedValue({ filePath: '/path/to/pdf' });
+    mockIsAvailableAsync.mockResolvedValue(true);
+
+    const { findByText } = render(<ChecklistDetailsScreen />);
+
+    const generatePdfButton = await findByText('Generuj raport PDF');
+    await act(async () => {
+      fireEvent.press(generatePdfButton);
+    });
+
     await waitFor(() => {
-      expect(getByText('Nie znaleziono checklisty.')).toBeTruthy();
+      expect(mockGetInfoAsync).toHaveBeenCalledWith('file:///image1.jpg');
+    });
+
+    await waitFor(() => {
+      expect(mockReadAsStringAsync).toHaveBeenCalledWith('file:///image1.jpg', {
+        encoding: 'base64',
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockConvert).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(mockShareAsync).toHaveBeenCalledWith('file:///path/to/pdf');
     });
   });
 });

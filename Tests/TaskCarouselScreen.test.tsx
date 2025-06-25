@@ -79,13 +79,17 @@ jest.mock('../src/data/realm', () => ({
 jest.mock('../src/hooks/useCamera', () => ({
   useCameraCapture: jest.fn(),
 }));
+let capturedOnSave: ((taskId: string) => void) | undefined;
 jest.mock('../src/components/TaskCarousel', () => {
   const React = require('react');
   const { Text } = require('react-native');
 
-  return ({ tasks, onChange, onAddPhoto, onSave, readonly }: any) => (
-    <Text testID="mock-carousel">{JSON.stringify({ tasks, readonly })}</Text>
-  );
+  return (props: any) => {
+    capturedOnSave = props.onSave;
+    return (
+      <Text testID="mock-carousel">{JSON.stringify({ tasks: props.tasks, readonly: props.readonly })}</Text>
+    );
+  };
 });
 
 const mockUseLocalSearchParams = require('expo-router').useLocalSearchParams as jest.Mock;
@@ -95,6 +99,7 @@ const mockUseCameraCapture = require('../src/hooks/useCamera').useCameraCapture 
 describe('TaskCarouselScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    capturedOnSave = undefined;
     mockDimensionsGet.mockReturnValue({
       width: 400,
       height: 800,
@@ -147,7 +152,7 @@ describe('TaskCarouselScreen', () => {
     const { findByTestId, getByText, getAllByText } = render(
       <NavigationContainer>
         <TaskCarouselScreen />
-      </NavigationContainer>
+      </NavigationContainer>,
     );
     const carousel = await findByTestId('mock-carousel');
     expect(carousel.props.children).toContain('Task 1');
@@ -201,11 +206,11 @@ describe('TaskCarouselScreen', () => {
     render(
       <NavigationContainer>
         <TaskCarouselScreen />
-      </NavigationContainer>
+      </NavigationContainer>,
     );
 
     // Dajmy komponentowi czas na inicjalizację
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Sprawdzamy początkowy stan - realm.write nie powinno być wywołane
     expect(realmWrite).not.toHaveBeenCalled();
@@ -252,7 +257,7 @@ describe('TaskCarouselScreen', () => {
     const { getByText } = render(
       <NavigationContainer>
         <TaskCarouselScreen />
-      </NavigationContainer>
+      </NavigationContainer>,
     );
     await waitFor(() => {
       expect(getByText('Brak zadań do wyświetlenia.')).toBeTruthy();
@@ -300,7 +305,7 @@ describe('TaskCarouselScreen', () => {
     const { findByTestId } = render(
       <NavigationContainer>
         <TaskCarouselScreen />
-      </NavigationContainer>
+      </NavigationContainer>,
     );
     await waitFor(() => expect(findByTestId('mock-carousel')).resolves.toBeTruthy());
 
@@ -349,9 +354,9 @@ describe('TaskCarouselScreen', () => {
     const { getByText } = render(
       <NavigationContainer>
         <TaskCarouselScreen />
-      </NavigationContainer>
+      </NavigationContainer>,
     );
-    
+
     // Ponieważ lista zadań jest pusta, powinien wyświetlić komunikat
     await waitFor(() => {
       expect(getByText('Brak zadań do wyświetlenia.')).toBeTruthy();
@@ -363,5 +368,131 @@ describe('TaskCarouselScreen', () => {
     });
 
     expect(Alert.alert).toHaveBeenCalledWith('Błąd', 'Nie znaleziono zadania do dodania zdjęcia.');
+  });
+  it('powinien_zapisać_zmiany_w_zadaniu_po_wywołaniu_handleSaveTask', async () => {
+    const checklistId = 'checklist-1';
+    const taskId = 'task-1';
+    const task = {
+      id: taskId,
+      checklistId,
+      title: 'Test Task',
+      komentarz: 'Initial comment',
+      photoUris: [],
+      osobaOdpowiedzialna: 'John Doe',
+    };
+
+    mockUseLocalSearchParams.mockReturnValue({
+      checklistId,
+      editMode: 'true',
+      readonly: 'false',
+    });
+
+    const realmWrite = jest.fn((cb) => cb());
+    const realmObjectForPrimaryKey = jest.fn().mockReturnValue(task);
+    const realmCreate = jest.fn();
+    const realmObjectsMock = jest.fn((model: string) => {
+      if (model === 'Task') {
+        return {
+          filtered: jest.fn().mockReturnValue([task]),
+        };
+      }
+      if (model === 'Checklist') {
+        return {
+          filtered: jest.fn().mockReturnValue([{ id: checklistId }]),
+        };
+      }
+      return [];
+    });
+
+    const realmInstance = {
+      objects: realmObjectsMock,
+      write: realmWrite,
+      objectForPrimaryKey: realmObjectForPrimaryKey,
+      create: realmCreate,
+      isClosed: false,
+      close: jest.fn(),
+    };
+    mockGetRealm.mockResolvedValue(realmInstance);
+
+    const { findByTestId } = render(<TaskCarouselScreen />);
+
+    await findByTestId('mock-carousel');
+
+    expect(capturedOnSave).toBeDefined();
+
+    act(() => {
+      if (capturedOnSave) {
+        capturedOnSave(taskId);
+      }
+    });
+
+    expect(realmWrite).toHaveBeenCalledTimes(1);
+    expect(realmObjectForPrimaryKey).toHaveBeenCalledWith('Task', taskId);
+    expect(task.komentarz).toBe('Initial comment');
+    expect(task.osobaOdpowiedzialna).toBe('John Doe');
+    expect(realmCreate).not.toHaveBeenCalled();
+  });
+
+  it('powinien pokazać alert, gdy zapis do bazy danych się nie powiedzie', async () => {
+    const checklistId = 'checklist-1';
+    const taskId = 'task-1';
+    const task = {
+      id: taskId,
+      checklistId,
+      title: 'Test Task',
+      komentarz: 'Initial comment',
+      photoUris: [],
+      osobaOdpowiedzialna: 'John Doe',
+    };
+
+    mockUseLocalSearchParams.mockReturnValue({
+      checklistId,
+      editMode: 'true',
+      readonly: 'false',
+    });
+
+    const realmWrite = jest.fn(() => {
+      throw new Error('DB write error');
+    });
+    const realmObjectForPrimaryKey = jest.fn().mockReturnValue(task);
+    const realmObjectsMock = jest.fn((model: string) => {
+      if (model === 'Task') {
+        return {
+          filtered: jest.fn().mockReturnValue([task]),
+        };
+      }
+      if (model === 'Checklist') {
+        return {
+          filtered: jest.fn().mockReturnValue([{ id: checklistId }]),
+        };
+      }
+      return [];
+    });
+
+    const realmInstance = {
+      objects: realmObjectsMock,
+      write: realmWrite,
+      objectForPrimaryKey: realmObjectForPrimaryKey,
+      isClosed: false,
+      close: jest.fn(),
+    };
+    mockGetRealm.mockResolvedValue(realmInstance);
+
+    const alertSpy = jest.spyOn(Alert, 'alert');
+
+    const { findByTestId } = render(<TaskCarouselScreen />);
+
+    await findByTestId('mock-carousel');
+
+    expect(capturedOnSave).toBeDefined();
+
+    act(() => {
+      if (capturedOnSave) {
+        capturedOnSave(taskId);
+      }
+    });
+
+    expect(realmWrite).toHaveBeenCalledTimes(1);
+    expect(alertSpy).toHaveBeenCalledWith('Błąd', 'Nie udało się zapisać zadania w bazie.');
   });
 });

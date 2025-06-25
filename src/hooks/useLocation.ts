@@ -1,7 +1,15 @@
 import * as Location from 'expo-location';
 
+/**
+ * Niestandardowy hak do pobierania bieżącej lokalizacji użytkownika.
+ * @returns {{getLocation: () => Promise<{latitude: number, longitude: number, city: string} | null>}} Obiekt zawierający funkcję `getLocation`.
+ */
 export const useCurrentLocation = () => {
-  const getLocation = async (): Promise<{ latitude: number; longitude: number; city: string } | null> => {
+  const getLocation = async (): Promise<{
+    latitude: number;
+    longitude: number;
+    city: string;
+  } | null> => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
       console.warn('Brak uprawnień do lokalizacji');
@@ -21,7 +29,7 @@ export const useCurrentLocation = () => {
       // Fallback to Nominatim HTTP lookup
       try {
         const resp = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${location.coords.latitude}&lon=${location.coords.longitude}`
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${location.coords.latitude}&lon=${location.coords.longitude}`,
         );
         const data = await resp.json();
         city = data.address.city || data.address.town || data.address.village || '';

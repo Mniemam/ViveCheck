@@ -3,12 +3,7 @@ import { LocationSchema, ChecklistItemSchema, ChecklistSchema, TaskSchema } from
 
 export const getRealm = async (): Promise<Realm> => {
   return await Realm.open({
-    schema: [
-       LocationSchema,
-       ChecklistItemSchema,
-       ChecklistSchema,
-       TaskSchema,
-     ],
+    schema: [LocationSchema, ChecklistItemSchema, ChecklistSchema, TaskSchema],
     schemaVersion: 9,
     onMigration: (oldRealm, newRealm) => {
       if (oldRealm.schemaVersion < 9) {

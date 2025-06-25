@@ -3,7 +3,8 @@ import { Alert } from 'react-native';
 import { getRealm } from '../data/realm';
 
 /**
- * Zapisuje checklistę do bazy Realm
+ * Zapisuje listę kontrolną w bazie danych Realm.
+ * @param {Checklist} checklist - Obiekt listy kontrolnej do zapisania.
  */
 export const saveChecklist = async (checklist: Checklist) => {
   try {
@@ -19,7 +20,8 @@ export const saveChecklist = async (checklist: Checklist) => {
 };
 
 /**
- * Pobiera wszystkie zapisane checklisty
+ * Ładuje wszystkie zapisane listy kontrolne z bazy danych Realm.
+ * @returns {Promise<Checklist[]>} Obietnica, która zwraca tablicę obiektów list kontrolnych.
  */
 export const loadChecklists = async (): Promise<Checklist[]> => {
   try {

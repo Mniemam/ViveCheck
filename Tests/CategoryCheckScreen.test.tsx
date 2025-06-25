@@ -19,7 +19,7 @@ describe('CategoryCheckScreen', () => {
     };
     require('expo-router').useLocalSearchParams.mockReturnValue(mockParams);
   });
-  
+
   it('powinien_wyświetlać_wszystkie_przyciski_kategorii', () => {
     const { getByText } = render(<CategoryCheckScreen />);
     initialCategories.forEach((category) => {
@@ -51,7 +51,7 @@ describe('CategoryCheckScreen', () => {
           checklistId: 'test-checklist-id',
           categoryTitle: initialCategories[0].title,
         }),
-      })
+      }),
     );
   });
 
@@ -102,7 +102,8 @@ describe('CategoryCheckScreen', () => {
       initialCategories: [],
     }));
     // Ponownie zaimportuj komponent, aby użyć zmockowanych kategorii
-    const CategoryCheckScreenWithNoCategories = require('../app/screens/Checklist/CategoryCheckScreen').default;
+    const CategoryCheckScreenWithNoCategories =
+      require('../app/screens/Checklist/CategoryCheckScreen').default;
     const { queryAllByRole } = render(<CategoryCheckScreenWithNoCategories />);
     // Zakładamy, że przyciski kategorii mają role 'button'
     expect(queryAllByRole('button').length).toBe(0);
@@ -119,7 +120,8 @@ describe('CategoryCheckScreen', () => {
       initialCategories: null,
     }));
     // Ponownie zaimportuj komponent, aby użyć zmockowanych kategorii
-    const CategoryCheckScreenWithError = require('../app/screens/Checklist/CategoryCheckScreen').default;
+    const CategoryCheckScreenWithError =
+      require('../app/screens/Checklist/CategoryCheckScreen').default;
     const { getByText } = render(<CategoryCheckScreenWithError />);
     // Interfejs zapasowy wyświetla domyślny nagłówek, gdy dane kategorii są nieprawidłowe
     expect(getByText('Wybierz kategorię')).toBeTruthy();

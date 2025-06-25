@@ -17,9 +17,7 @@ jest.mock('../src/data/categories', () => ({
   initialCategories: [
     {
       title: 'Test Category',
-      tasks: [
-        { id: '1', title: 'Test Task', komentarz: '', osobaOdpowiedzialna: '' },
-      ],
+      tasks: [{ id: '1', title: 'Test Task', komentarz: '', osobaOdpowiedzialna: '' }],
     },
   ],
 }));
@@ -34,7 +32,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   (require('expo-router').useRouter as jest.Mock).mockReturnValue({ push: mockPush });
   (require('../src/data/realm').getRealm as jest.Mock).mockResolvedValue({
-    write: jest.fn(fn => fn()),
+    write: jest.fn((fn) => fn()),
     create: jest.fn(),
     objectForPrimaryKey: jest.fn(),
     close: jest.fn(),
@@ -100,7 +98,9 @@ describe('ChecklistaFormScreen', () => {
       city: 'MiastoTest',
       items: [],
     };
-    (require('expo-router').useLocalSearchParams as jest.Mock).mockReturnValue({ checklistId: 'abc123' });
+    (require('expo-router').useLocalSearchParams as jest.Mock).mockReturnValue({
+      checklistId: 'abc123',
+    });
     (require('../src/context/AppContext').useAppContext as jest.Mock).mockReturnValue({
       state: { checklists: [checklist] },
     });
@@ -153,7 +153,9 @@ describe('ChecklistaFormScreen', () => {
   });
 
   it('powinien_pokazać_błąd_dla_niepoprawnego_id_checklisty_w_trybie_podglądu', () => {
-    (require('expo-router').useLocalSearchParams as jest.Mock).mockReturnValue({ checklistId: 'notfound' });
+    (require('expo-router').useLocalSearchParams as jest.Mock).mockReturnValue({
+      checklistId: 'notfound',
+    });
     (require('../src/context/AppContext').useAppContext as jest.Mock).mockReturnValue({
       state: { checklists: [] },
     });
@@ -191,7 +193,7 @@ describe('ChecklistaFormScreen', () => {
 
     expect(mockAlert).toHaveBeenCalledWith(
       'Brak zasięgu GPS',
-      'Nie udało się pobrać lokalizacji. Przechodzisz dalej bez lokalizacji.'
+      'Nie udało się pobrać lokalizacji. Przechodzisz dalej bez lokalizacji.',
     );
     expect(mockPush).toHaveBeenCalled();
   });

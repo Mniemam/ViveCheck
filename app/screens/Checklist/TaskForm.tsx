@@ -8,7 +8,7 @@ import { Checklist, Task } from '@/context/types';
 import { v4 as uuidv4 } from 'uuid';
 import { useCameraCapture } from '../../../src/hooks/useCamera';
 import { useCurrentLocation } from '../../../src/hooks/useLocation';
-import { saveChecklist } from '../../../src/storage/storageHelpers'; 
+import { saveChecklist } from '../../../src/storage/storageHelpers';
 
 // Typ route params
 type TaskFormRouteParams = {
@@ -82,7 +82,7 @@ export default function TaskForm() {
         })),
       };
       //Zapis do Raelm
-      await saveChecklist(newChecklist); 
+      await saveChecklist(newChecklist);
       dispatch({ type: 'ADD_CHECKLIST', payload: newChecklist });
       Alert.alert('Sukces', 'Zapisano checklistę!');
     } catch (error) {

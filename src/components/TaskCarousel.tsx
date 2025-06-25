@@ -15,6 +15,11 @@ type TaskCarouselProps = {
 
 const horizontalMargin = 16;
 
+/**
+ * Komponent karuzeli do wyświetlania i edycji zadań.
+ * @param {TaskCarouselProps} props - Właściwości komponentu.
+ * @returns {React.FC} Komponent TaskCarousel.
+ */
 const TaskCarousel: React.FC<TaskCarouselProps> = ({
   tasks,
   screenWidth,
@@ -128,7 +133,6 @@ const TaskCarousel: React.FC<TaskCarouselProps> = ({
             </View>
           )}
 
-          
           {!readonly && (
             <Pressable
               style={[carouselStyles.photoButton, localStyles.saveButton]}

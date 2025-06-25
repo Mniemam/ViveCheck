@@ -13,7 +13,10 @@ async function isOnline() {
   try {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
-    const response = await fetch('https://www.google.com', { method: 'HEAD', signal: controller.signal });
+    const response = await fetch('https://www.google.com', {
+      method: 'HEAD',
+      signal: controller.signal,
+    });
     clearTimeout(id);
     return response.ok;
   } catch {
@@ -123,9 +126,7 @@ export default function CompletedChecklistsScreen() {
                     const checklistToDelete = realm.objectForPrimaryKey('Checklist', item.id);
                     if (checklistToDelete) realm.delete(checklistToDelete);
                   });
-                  const all = realm
-                    .objects<Checklist>('Checklist')
-                    .sorted('createdAt', true);
+                  const all = realm.objects<Checklist>('Checklist').sorted('createdAt', true);
                   setChecklists([...JSON.parse(JSON.stringify(all))]);
                   realm.close();
                 } catch (error) {

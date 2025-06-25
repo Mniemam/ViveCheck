@@ -53,7 +53,11 @@ describe('appReducer', () => {
   });
 
   it('powinien_obsłużyć_nieprawidłowy_payload_checklisty', () => {
-    const malformedChecklist = { sklep: 'No ID', createdAt: new Date(), items: [] } as unknown as Checklist;
+    const malformedChecklist = {
+      sklep: 'No ID',
+      createdAt: new Date(),
+      items: [],
+    } as unknown as Checklist;
     const action: Action = { type: 'ADD_CHECKLIST', payload: malformedChecklist };
     // Reducer doda nieprawidłowy obiekt bez zmian
     const result = appReducer(initialState, action);

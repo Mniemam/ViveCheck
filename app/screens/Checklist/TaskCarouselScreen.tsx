@@ -74,7 +74,9 @@ export default function TaskCarouselScreen() {
     if (realm && updatedTasks[taskIndex].id && checklistId) {
       try {
         realm.write(() => {
-          const realmTask = realm.objectForPrimaryKey('Task', updatedTasks[taskIndex].id) as Task | undefined;
+          const realmTask = realm.objectForPrimaryKey('Task', updatedTasks[taskIndex].id) as
+            | Task
+            | undefined;
           if (realmTask) {
             (realmTask as any)[field] = value;
           }
@@ -113,7 +115,9 @@ export default function TaskCarouselScreen() {
         if (realm && updatedTasks[taskIndex].id && checklistId) {
           try {
             realm.write(() => {
-              const realmTask = realm.objectForPrimaryKey('Task', updatedTasks[taskIndex].id) as Task | undefined;
+              const realmTask = realm.objectForPrimaryKey('Task', updatedTasks[taskIndex].id) as
+                | Task
+                | undefined;
               if (realmTask) {
                 realmTask.photoUris = [...prevUris, photoUri];
               }

@@ -1,7 +1,10 @@
 import { savePhotoToAppDirectory } from '../src/storage/fileHelpers';
 jest.mock('expo-file-system', () => ({
   documentDirectory: 'file:///mocked_directory/',
-  getInfoAsync: jest.fn(async (uri) => ({ exists: uri.includes('test_photo') || uri.includes('photos'), isDirectory: uri.includes('photos') })),
+  getInfoAsync: jest.fn(async (uri) => ({
+    exists: uri.includes('test_photo') || uri.includes('photos'),
+    isDirectory: uri.includes('photos'),
+  })),
   writeAsStringAsync: jest.fn(async () => {}),
   deleteAsync: jest.fn(async () => {}),
   makeDirectoryAsync: jest.fn(async () => {}),
@@ -142,6 +145,7 @@ describe('savePhotoToAppDirectory', () => {
     // Sprzątanie
     await FileSystem.deleteAsync(srcUri, { idempotent: true });
     if (resultWithPrefix) await FileSystem.deleteAsync(resultWithPrefix, { idempotent: true });
-    if (resultWithoutPrefix) await FileSystem.deleteAsync(resultWithoutPrefix, { idempotent: true });
+    if (resultWithoutPrefix)
+      await FileSystem.deleteAsync(resultWithoutPrefix, { idempotent: true });
   });
 });

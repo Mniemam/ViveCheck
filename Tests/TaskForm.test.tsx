@@ -214,7 +214,11 @@ describe('TaskForm', () => {
 
   it('powinien_pokazać_błąd_przy_zapisie_checklisty', async () => {
     const { saveChecklist, useCurrentLocation } = setup();
-    useCurrentLocation().getLocation.mockResolvedValue({ latitude: 1, longitude: 2, city: 'Warsaw' });
+    useCurrentLocation().getLocation.mockResolvedValue({
+      latitude: 1,
+      longitude: 2,
+      city: 'Warsaw',
+    });
     saveChecklist.mockRejectedValue(new Error('Realm error'));
 
     const { getByText } = render(<TaskForm />);

@@ -1,4 +1,13 @@
-import { View, Text, TextInput, StyleSheet, Button, ScrollView, Alert, Pressable } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  Button,
+  ScrollView,
+  Alert,
+  Pressable,
+} from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { useAppContext } from '../../../src/context/AppContext';
@@ -23,10 +32,18 @@ export default function ChecklistaFormScreen() {
   // Stan pól formularza (tylko do edycji/nowej checklisty)
   const [sklep, setSklep] = useState(isPreview ? checklist?.sklep || '' : '');
   const [mr, setMR] = useState(isPreview ? checklist?.mr || '' : '');
-  const [prowadzacaZmiane, setProwadzacaZmiane] = useState(isPreview ? checklist?.prowadzacaZmiane || '' : '');
-  const [prognozaPodstawowy, setPrognozaPodstawowy] = useState(isPreview ? checklist?.prognozaPodstawowy || '' : '');
-  const [prognozaKomplementarny, setPrognozaKomplementarny] = useState(isPreview ? checklist?.prognozaKomplementarny || '' : '');
-  const [skutecznoscChemii, setSkutecznoscChemii] = useState(isPreview ? checklist?.skutecznoscChemii || '' : '');
+  const [prowadzacaZmiane, setProwadzacaZmiane] = useState(
+    isPreview ? checklist?.prowadzacaZmiane || '' : '',
+  );
+  const [prognozaPodstawowy, setPrognozaPodstawowy] = useState(
+    isPreview ? checklist?.prognozaPodstawowy || '' : '',
+  );
+  const [prognozaKomplementarny, setPrognozaKomplementarny] = useState(
+    isPreview ? checklist?.prognozaKomplementarny || '' : '',
+  );
+  const [skutecznoscChemii, setSkutecznoscChemii] = useState(
+    isPreview ? checklist?.skutecznoscChemii || '' : '',
+  );
 
   // Przygotuj WSZYSTKIE zadania ze wszystkich kategorii (tylko do nowej)
   const allCategoryTasks = initialCategories.flatMap((cat) =>
@@ -44,7 +61,11 @@ export default function ChecklistaFormScreen() {
   const [realm, setRealm] = useState<Realm | null>(null);
 
   const { getLocation } = useCurrentLocation();
-  const [cachedLoc, setCachedLoc] = useState<{ latitude: number; longitude: number; city: string } | null>(null);
+  const [cachedLoc, setCachedLoc] = useState<{
+    latitude: number;
+    longitude: number;
+    city: string;
+  } | null>(null);
 
   useEffect(() => {
     let realmInstance: Realm;
@@ -65,7 +86,7 @@ export default function ChecklistaFormScreen() {
 
   useEffect(() => {
     let mounted = true;
-    getLocation().then(loc => {
+    getLocation().then((loc) => {
       if (mounted) setCachedLoc(loc);
     });
     return () => {
@@ -162,12 +183,15 @@ export default function ChecklistaFormScreen() {
             <Pressable
               style={styles.nextButton}
               onPress={async () => {
-                // weryfikacja GPS 
+                // weryfikacja GPS
                 let latitude = 0;
                 let longitude = 0;
                 let cityName = '';
                 if (!cachedLoc) {
-                  Alert.alert('Brak zasięgu GPS', 'Nie udało się pobrać lokalizacji. Przechodzisz dalej bez lokalizacji.');
+                  Alert.alert(
+                    'Brak zasięgu GPS',
+                    'Nie udało się pobrać lokalizacji. Przechodzisz dalej bez lokalizacji.',
+                  );
                 } else {
                   latitude = cachedLoc.latitude;
                   longitude = cachedLoc.longitude;
@@ -189,33 +213,41 @@ export default function ChecklistaFormScreen() {
                   }));
 
                   realm.write(() => {
-                    realm.create('Checklist', {
-                      id,
-                      sklep,
-                      mr,
-                      prowadzacaZmiane,
-                      prognozaPodstawowy,
-                      prognozaKomplementarny,
-                      skutecznoscChemii,
-                      createdAt: new Date(),
-                      location: { latitude, longitude },
-                      city: cityName,
-                      items: tasksWithIds.map(task => ({
-                        id: task.id,
-                        title: task.title,
-                        completed: false,
-                        komentarz: task.komentarz || '',
-                        osobaOdpowiedzialna: task.osobaOdpowiedzialna || '',
-                      })),
-                    }, true);
+                    realm.create(
+                      'Checklist',
+                      {
+                        id,
+                        sklep,
+                        mr,
+                        prowadzacaZmiane,
+                        prognozaPodstawowy,
+                        prognozaKomplementarny,
+                        skutecznoscChemii,
+                        createdAt: new Date(),
+                        location: { latitude, longitude },
+                        city: cityName,
+                        items: tasksWithIds.map((task) => ({
+                          id: task.id,
+                          title: task.title,
+                          completed: false,
+                          komentarz: task.komentarz || '',
+                          osobaOdpowiedzialna: task.osobaOdpowiedzialna || '',
+                        })),
+                      },
+                      true,
+                    );
 
                     tasksWithIds.forEach((task) => {
                       const existing = realm.objectForPrimaryKey('Task', task.id);
                       if (!existing) {
-                        realm.create('Task', { 
-                          ...task, 
-                          completed: task.completed ?? false 
-                        }, true);
+                        realm.create(
+                          'Task',
+                          {
+                            ...task,
+                            completed: task.completed ?? false,
+                          },
+                          true,
+                        );
                       }
                     });
                   });
@@ -248,7 +280,10 @@ export default function ChecklistaFormScreen() {
                             const cl = realmBg.objectForPrimaryKey('Checklist', id);
                             if (cl) {
                               cl.city = fresh.city;
-                              cl.location = { latitude: fresh.latitude, longitude: fresh.longitude };
+                              cl.location = {
+                                latitude: fresh.latitude,
+                                longitude: fresh.longitude,
+                              };
                             }
                           });
                         }
@@ -259,7 +294,11 @@ export default function ChecklistaFormScreen() {
                   }
                 } catch (e: any) {
                   console.error(e);
-                  Alert.alert('Błąd', 'Nie udało się zapisać checklisty: ' + (e instanceof Error ? e.message : String(e)));
+                  Alert.alert(
+                    'Błąd',
+                    'Nie udało się zapisać checklisty: ' +
+                      (e instanceof Error ? e.message : String(e)),
+                  );
                 }
               }}
             >

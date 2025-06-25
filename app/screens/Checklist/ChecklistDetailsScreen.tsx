@@ -20,7 +20,9 @@ export default function ChecklistDetailsScreen() {
       const foundObj = instance.objectForPrimaryKey<Checklist>('Checklist', id as string);
       if (foundObj) {
         // Convert Realm object to plain JS and restore Date
-        const parsed = JSON.parse(JSON.stringify(foundObj)) as Omit<Checklist, 'createdAt'> & { createdAt: string };
+        const parsed = JSON.parse(JSON.stringify(foundObj)) as Omit<Checklist, 'createdAt'> & {
+          createdAt: string;
+        };
         setChecklist({
           ...parsed,
           createdAt: new Date(parsed.createdAt),
@@ -119,11 +121,13 @@ export default function ChecklistDetailsScreen() {
               const tasksRaw = realmInstance
                 .objects<Task>('Task')
                 .filtered('checklistId == $0', checklist.id);
-              const tasks = JSON.parse(JSON.stringify(tasksRaw)) as Array<Task & {
-                photoUris?: string[];
-              }>;
+              const tasks = JSON.parse(JSON.stringify(tasksRaw)) as Array<
+                Task & {
+                  photoUris?: string[];
+                }
+              >;
               console.log('Zadania do PDF:', tasks);
-              // Zamień zdjęcia na base64 
+              // Zamień zdjęcia na base64
               const tasksWithBase64 = await Promise.all(
                 tasks.map(async (task: Task & { photoUris?: string[] }) => {
                   let photoBase64Arr: string[] = [];
@@ -145,10 +149,7 @@ export default function ChecklistDetailsScreen() {
                       }
                     }
                   } else {
-                    console.log(
-                      'Brak photoUris dla zadania:',
-                      task.title || task.id,
-                    );
+                    console.log('Brak photoUris dla zadania:', task.title || task.id);
                   }
                   return { ...task, photoBase64Arr };
                 }),
@@ -177,10 +178,7 @@ export default function ChecklistDetailsScreen() {
               if (filePath && (await Sharing.isAvailableAsync())) {
                 await Sharing.shareAsync(filePath);
               } else {
-                Alert.alert(
-                  'PDF zapisany',
-                  `Plik PDF zapisany w:\n${pdf.filePath}`,
-                );
+                Alert.alert('PDF zapisany', `Plik PDF zapisany w:\n${pdf.filePath}`);
               }
             } catch (e) {
               Alert.alert('Błąd PDF', String(e));

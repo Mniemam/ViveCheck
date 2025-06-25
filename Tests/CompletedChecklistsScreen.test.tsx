@@ -18,9 +18,7 @@ afterAll(() => {
 jest.mock('@expo/vector-icons', () => {
   const React = require('react');
   const { View } = require('react-native');
-  const DummyIcon = (props: any) => (
-    <View testID={`Ionicons/${props.name}`} />
-  );
+  const DummyIcon = (props: any) => <View testID={`Ionicons/${props.name}`} />;
   return { __esModule: true, Ionicons: DummyIcon };
 });
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
@@ -56,11 +54,12 @@ const mockGetLocation = jest.fn();
 const mockIsOnline = jest.fn();
 const mockSyncChecklistsIfNeeded = jest.fn();
 
-
 beforeEach(() => {
   jest.clearAllMocks();
   (require('expo-router').useRouter as jest.Mock).mockReturnValue({ push: mockRouterPush });
-  (require('../src/hooks/useLocation').useCurrentLocation as jest.Mock).mockReturnValue({ getLocation: mockGetLocation });
+  (require('../src/hooks/useLocation').useCurrentLocation as jest.Mock).mockReturnValue({
+    getLocation: mockGetLocation,
+  });
 });
 
 describe('CompletedChecklistsScreen', () => {
@@ -83,7 +82,7 @@ describe('CompletedChecklistsScreen', () => {
     const { getByText } = render(
       <NavigationContainer>
         <CompletedChecklistsScreen />
-      </NavigationContainer>
+      </NavigationContainer>,
     );
     await waitFor(() => {
       expect(getByText('Lidl')).toBeTruthy();
@@ -94,23 +93,22 @@ describe('CompletedChecklistsScreen', () => {
   it('powinien_usunąć_checklistę_i_zadania_po_kliknięciu_kosza', async () => {
     const mockChecklist = { id: '1', sklep: 'Biedronka', createdAt: new Date(), items: [] };
     const realmDelete = jest.fn();
-    const realmWrite = jest.fn(cb => cb());
+    const realmWrite = jest.fn((cb) => cb());
     const realmObjects = {
-      objects: jest.fn()
-        .mockImplementation((model: string) => {
-          if (model === 'Checklist') {
-            return {
-              sorted: jest.fn().mockReturnValue([mockChecklist]),
-              filtered: jest.fn().mockReturnValue([mockChecklist]),
-            };
-          }
-          if (model === 'Task') {
-            return {
-              filtered: jest.fn().mockReturnValue([{ id: 't1' }]),
-            };
-          }
-          return [];
-        }),
+      objects: jest.fn().mockImplementation((model: string) => {
+        if (model === 'Checklist') {
+          return {
+            sorted: jest.fn().mockReturnValue([mockChecklist]),
+            filtered: jest.fn().mockReturnValue([mockChecklist]),
+          };
+        }
+        if (model === 'Task') {
+          return {
+            filtered: jest.fn().mockReturnValue([{ id: 't1' }]),
+          };
+        }
+        return [];
+      }),
       objectForPrimaryKey: jest.fn().mockReturnValue(mockChecklist),
       write: realmWrite,
       delete: realmDelete,
@@ -122,20 +120,25 @@ describe('CompletedChecklistsScreen', () => {
     const { getByTestId } = render(
       <NavigationContainer>
         <CompletedChecklistsScreen />
-      </NavigationContainer>
+      </NavigationContainer>,
     );
-    
+
     // Poczekaj na wyrenderowanie przycisku
-    const deleteButton = await waitFor(() => getByTestId('Ionicons/trash-outline'), { timeout: 2000 });
-    
+    const deleteButton = await waitFor(() => getByTestId('Ionicons/trash-outline'), {
+      timeout: 2000,
+    });
+
     // Kliknij przycisk
     fireEvent.press(deleteButton);
 
     // Sprawdź czy funkcje zostały wywołane
-    await waitFor(() => {
-      expect(realmWrite).toHaveBeenCalled();
-      expect(realmDelete).toHaveBeenCalled();
-    }, { timeout: 2000 });
+    await waitFor(
+      () => {
+        expect(realmWrite).toHaveBeenCalled();
+        expect(realmDelete).toHaveBeenCalled();
+      },
+      { timeout: 2000 },
+    );
   });
 
   it('powinien_uzupełnić_brakujące_pola_miasta_przy_wejściu_na_ekran', async () => {
@@ -147,7 +150,7 @@ describe('CompletedChecklistsScreen', () => {
       location: { latitude: 1, longitude: 2 },
       items: [],
     };
-    const realmWrite = jest.fn(cb => cb());
+    const realmWrite = jest.fn((cb) => cb());
     const realmObjects = {
       objects: jest.fn().mockImplementation((model: string) => {
         if (model === 'Checklist') {
@@ -168,7 +171,7 @@ describe('CompletedChecklistsScreen', () => {
     render(
       <NavigationContainer>
         <CompletedChecklistsScreen />
-      </NavigationContainer>
+      </NavigationContainer>,
     );
     await waitFor(() => {
       expect(mockGetLocation).toHaveBeenCalledTimes(1);
@@ -191,7 +194,7 @@ describe('CompletedChecklistsScreen', () => {
     const { getByText } = render(
       <NavigationContainer>
         <CompletedChecklistsScreen />
-      </NavigationContainer>
+      </NavigationContainer>,
     );
     await waitFor(() => {
       expect(getByText('Brak wykonanych checklist.')).toBeTruthy();
@@ -207,7 +210,7 @@ describe('CompletedChecklistsScreen', () => {
       location: { latitude: 1, longitude: 2 },
       items: [],
     };
-    const realmWrite = jest.fn(cb => cb());
+    const realmWrite = jest.fn((cb) => cb());
     const realmObjects = {
       objects: jest.fn().mockImplementation((model: string) => {
         if (model === 'Checklist') {
@@ -228,7 +231,7 @@ describe('CompletedChecklistsScreen', () => {
     render(
       <NavigationContainer>
         <CompletedChecklistsScreen />
-      </NavigationContainer>
+      </NavigationContainer>,
     );
     await waitFor(() => {
       expect(mockGetLocation).toHaveBeenCalled();
